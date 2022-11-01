@@ -1,0 +1,7 @@
+name: BlockDefence
+version: '${project.version}'
+main: com.ja90n.blockdefence.BlockDefence
+api-version: 1.19
+authors: [ Ja90n ]
+commands:
+  bd:
