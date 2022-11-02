@@ -32,16 +32,24 @@ public class EnemyManager {
         }
     }
 
+    public ArrayList<Enemy> getEnemies(List<Entity> entities){
+        ArrayList<Enemy> enemies1 = new ArrayList<>();
+        for (Entity entity : entities){
+            if (entity instanceof ArmorStand){
+                if (getEnemy((ArmorStand) entity) != null){
+                    enemies1.add(getEnemy((ArmorStand) entity));
+                }
+            }
+        }
+        return enemies1;
+    }
+
     public void addEnemyToRemove(Enemy enemy){
         enemiesToRemove.add(enemy);
     }
 
     public void addEnemy(Enemy enemy){
         enemies.add(enemy);
-    }
-
-    public void removeEnemy(Enemy enemy){
-        enemies.remove(enemy);
     }
 
     public Enemy getEnemy(ArmorStand armorStand){

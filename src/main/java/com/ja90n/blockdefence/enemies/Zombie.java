@@ -1,14 +1,12 @@
 package com.ja90n.blockdefence.enemies;
 
 import com.ja90n.blockdefence.BlockDefence;
-import com.ja90n.blockdefence.util.GeneratePath;
+import com.ja90n.blockdefence.util.PathGenerator;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
@@ -30,7 +28,7 @@ public class Zombie implements Enemy{
 
         health = 10.0;
         movementSpeed = 1;
-        path = new GeneratePath(blockDefence).generatePath(movementSpeed);
+        path = blockDefence.getPathGenerator().getPath(movementSpeed);
     }
 
     @Override

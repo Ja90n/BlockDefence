@@ -1,14 +1,12 @@
 package com.ja90n.blockdefence.enemies;
 
 import com.ja90n.blockdefence.BlockDefence;
-import com.ja90n.blockdefence.util.GeneratePath;
+import com.ja90n.blockdefence.util.PathGenerator;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
@@ -28,9 +26,9 @@ public class Smiler implements Enemy{
         armorStand.setInvisible(true);
         armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,2));
 
-        health = 10.0;
-        movementSpeed = 0.2;
-        path = new GeneratePath(blockDefence).generatePath(movementSpeed);
+        health = 50.0;
+        movementSpeed = 2;
+        path = blockDefence.getPathGenerator().getPath(movementSpeed);
     }
 
     @Override

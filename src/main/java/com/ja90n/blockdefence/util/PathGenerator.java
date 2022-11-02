@@ -1,20 +1,35 @@
 package com.ja90n.blockdefence.util;
 
 import com.ja90n.blockdefence.BlockDefence;
-import com.ja90n.blockdefence.enemies.Enemy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class GeneratePath {
+public class PathGenerator {
 
     private BlockDefence blockDefence;
+    private HashMap<Double, ArrayList<Location>> generatedPaths;
 
-    public GeneratePath(BlockDefence blockDefence){
+    public PathGenerator(BlockDefence blockDefence){
         this.blockDefence = blockDefence;
+        generatedPaths = new HashMap<>();
+    }
+
+    public ArrayList<Location> getPath(double movementSpeed){
+        return generatePath(movementSpeed);
+        /*
+        if (!generatedPaths.containsKey(movementSpeed)){
+            generatedPaths.put(movementSpeed,generatePath(movementSpeed));
+            return generatedPaths.get(movementSpeed);
+        } else {
+            return generatedPaths.get(movementSpeed);
+        }
+
+         */
     }
 
     public ArrayList<Location> generatePath(double movementSpeed){

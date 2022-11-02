@@ -1,6 +1,7 @@
 package com.ja90n.blockdefence.managers;
 
 import com.ja90n.blockdefence.BlockDefence;
+import com.ja90n.blockdefence.towers.Moveable;
 import com.ja90n.blockdefence.towers.Tower;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -10,11 +11,15 @@ import java.util.ArrayList;
 public class TowerManager {
 
     private BlockDefence blockDefence;
+    private ArrayList<Moveable> moveablesToSpawn;
+    private ArrayList<Tower> towersToRemove;
     private ArrayList<Tower> towers;
 
     public TowerManager(BlockDefence blockDefence){
         this.blockDefence = blockDefence;
         towers = new ArrayList<>();
+        moveablesToSpawn = new ArrayList<>();
+        towersToRemove = new ArrayList<>();
     }
 
     public void addTower(Tower tower){
@@ -28,6 +33,10 @@ public class TowerManager {
             }
         }
         return null;
+    }
+
+    public void addMoveablesToSpawn(Moveable moveables){
+        moveablesToSpawn.add(moveables);
     }
 
     public Tower getTower(Location location){
@@ -51,11 +60,24 @@ public class TowerManager {
         towersToRemove.clear();
     }
 
-    public void removeTower(Tower tower){
-        towers.remove(tower);
+    public void addTowerToRemove(Tower tower){
+        if (tower.getArmorStand() != null){
+            tower.getArmorStand().remove();
+        }
+        towersToRemove.add(tower);
     }
 
     public ArrayList<Tower> getTowers() {
+        if (!moveablesToSpawn.isEmpty()){
+            towers.addAll(moveablesToSpawn);
+            moveablesToSpawn.clear();
+        }
+        if (!towersToRemove.isEmpty()){
+            for (Tower tower : towersToRemove){
+                towers.remove(tower);
+            }
+            towersToRemove.clear();
+        }
         return towers;
     }
 }

@@ -9,7 +9,6 @@ public interface Tower {
     ArmorStand getArmorStand();
 
     default void remove(){
-        BlockDefence.getInstance().getTowerManager().removeTower(this);
-        getArmorStand().remove();
+        BlockDefence.getInstance().getTowerManager().addTowerToRemove(this);
     }
 }
