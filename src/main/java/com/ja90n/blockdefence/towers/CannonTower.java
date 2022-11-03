@@ -2,12 +2,14 @@ package com.ja90n.blockdefence.towers;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CannonTower implements Tower {
@@ -19,13 +21,15 @@ public class CannonTower implements Tower {
     private double damage;
     private double range;
 
-    private BlockDefence blockDefence;
+    private double totalValue;
+
+    private Game game;
 
     private int shootCooldown = 0;
 
-    public CannonTower(Location location, BlockDefence blockDefence){
+    public CannonTower(Location location, Game game){
 
-        this.blockDefence = blockDefence;
+        this.game = game;
 
         fireRate = 80;
         damage = 10;
@@ -43,20 +47,20 @@ public class CannonTower implements Tower {
         shootCooldown++;
         if (shootCooldown == fireRate){
             if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
-                Enemy target = blockDefence.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
+                Enemy target = game.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
                 if (target != null){
                     target.damage(damage);
                     armorStand.getLocation().getWorld().playEffect(armorStand.getLocation(), Effect.SMOKE,4);
-                    Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(186, 9, 9), 1.0F);
-                    target.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target.getArmorStand().getLocation().add(0,0.5,0), 10, dustOptions);
                     armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
                             .subtract(armorStand.getLocation().toVector())));
+
+                    // Splash damage calculations
                     for (Entity entity : target.getArmorStand().getNearbyEntities(1,1,1)){
                         if (entity instanceof ArmorStand){
-                            Enemy target1 = blockDefence.getEnemyManager().getEnemy((ArmorStand) entity);
+                            Enemy target1 = game.getEnemyManager().getEnemy((ArmorStand) entity);
                             if (target1 != null){
                                 target1.damage(damage / 2);
-                                target1.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target1.getArmorStand().getLocation().add(0,0.5,0), 10, dustOptions);
+                                target1.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target1.getArmorStand().getLocation().add(0,0.5,0), 10);
                             }
                         }
                     }
@@ -72,7 +76,22 @@ public class CannonTower implements Tower {
     }
 
     @Override
+    public Inventory getTowerMenu() {
+        return null;
+    }
+
+    @Override
     public ArmorStand getArmorStand() {
         return armorStand;
+    }
+
+    @Override
+    public Game getGame() {
+        return null;
+    }
+
+    @Override
+    public double getTotalValue() {
+        return totalValue;
     }
 }

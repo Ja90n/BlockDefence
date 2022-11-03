@@ -1,6 +1,7 @@
 package com.ja90n.blockdefence.command;
 
 import com.ja90n.blockdefence.BlockDefence;
+import com.ja90n.blockdefence.enums.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -38,7 +39,12 @@ public class MainCommand implements CommandExecutor {
                         if (blockDefence.getArenaManager().getArena(player) != null) {
                             player.sendMessage("You are already in an arena");
                         } else {
-                            blockDefence.getArenaManager().getArena(0).addPlayer(player);
+                            if (blockDefence.getArenaManager().getArena(0).getGameState().equals(GameState.LIVE)){
+                                player.sendMessage("Game is alreadt live");
+                            } else {
+                                blockDefence.getArenaManager().getArena(0).addPlayer(player);
+                                player.sendMessage("added");
+                            }
                         }
                         break;
                     case "start":
@@ -47,18 +53,23 @@ public class MainCommand implements CommandExecutor {
                         } else {
                             player.sendMessage("you are not in a game");
                         }
+                        break;
                     case "leave":
                         if (blockDefence.getArenaManager().getArena(player) != null){
-                            blockDefence.getArenaManager().getArena(player).removePlayer(player);
+                            blockDefence.getArenaManager().getArena(player).removePlayer(player,false);
                         } else {
                             player.sendMessage("You are not in an arena");
                         }
+                        break;
                     case "stop":
                         if (blockDefence.getArenaManager().getArena(player) != null){
                             blockDefence.getArenaManager().getArena(player).stopGame();
                         } else {
                             player.sendMessage("You are not in an arena");
                         }
+                        break;
+                    case "state":
+                        player.sendMessage(blockDefence.getArenaManager().getArena(0).getGameState().name());
                 }
         }
         return false;

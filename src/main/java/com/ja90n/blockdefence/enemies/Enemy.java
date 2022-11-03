@@ -1,9 +1,12 @@
 package com.ja90n.blockdefence.enemies;
 
 import com.ja90n.blockdefence.BlockDefence;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.managers.EnemyManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 
 import java.util.ArrayList;
@@ -35,13 +38,14 @@ public interface Enemy {
         Bukkit.broadcastMessage("an enemy with " + getHealth() + " health made it to the end");
     }
     default void remove(){
-        BlockDefence.getInstance().getEnemyManager().addEnemyToRemove(this);
+        getGame().getEnemyManager().addEnemyToRemove(this);
         getArmorStand().remove();
         getPath().clear();
     }
     double getHealth();
-    void damage(double health);
+    void damage(double damage);
     ArrayList<Location> getPath();
     ArmorStand getArmorStand();
     int getPointOnTrack();
+    Game getGame();
 }

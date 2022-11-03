@@ -2,6 +2,8 @@ package com.ja90n.blockdefence.instances;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enums.GameState;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -29,24 +31,23 @@ public class Arena {
         players = new ArrayList<>();
     }
 
-    public void startGame(){ game.start();}
+    public void startGame(){
+        game.start();
+        sendMessage("game has been started");
+    }
 
     public void stopGame(){
         if (gameState.equals(GameState.LIVE)){
+            game.getGameRunnable().cancel();
+            sendMessage("ggame is stopping");
             for (UUID uuid : players){
-                Player player = Bukkit.getPlayer(uuid);
-                player.setGameMode(GameMode.ADVENTURE);
-                player.getInventory().clear();
-                player.getEnderChest().clear();
-                player.setInvisible(false);
-                player.setInvulnerable(false);
-                player.setAllowFlight(false);
-                player.setFlying(false);
-                player.removePotionEffect(PotionEffectType.SPEED);
-                player.removePotionEffect(PotionEffectType.INVISIBILITY);
-                player.removePotionEffect(PotionEffectType.WEAKNESS);
+                removePlayer(Bukkit.getPlayer(uuid), true);
             }
             players.clear();
+            gameState = GameState.RECRUITING;
+            game.getTowerManager().clearTowers();
+            game.getEnemyManager().clearEnemies();
+            game = new Game(blockDefence,this);
         }
     }
 
@@ -56,18 +57,26 @@ public class Arena {
         player.setGameMode(GameMode.ADVENTURE);
     }
 
-    public void removePlayer(Player player){
-        players.remove(player.getUniqueId());
+    public void removePlayer(Player player, boolean gameEnd){
         player.getInventory().clear();
         player.getEnderChest().clear();
         player.setInvisible(false);
         player.setInvulnerable(false);
         player.setAllowFlight(false);
         player.setFlying(false);
-        player.removePotionEffect(PotionEffectType.SPEED);
-        player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.setGameMode(GameMode.ADVENTURE);
         player.sendTitle(" ", " ");
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(" "));
+
+        if (!gameEnd){
+            players.remove(player.getUniqueId());
+            if (gameState.equals(GameState.LIVE)){
+                game.getCoins().remove(player.getUniqueId());
+                if (players.size() == 0){
+                    stopGame();
+                }
+            }
+        }
     }
 
     public void sendMessage(String message){
@@ -98,5 +107,9 @@ public class Arena {
 
     public Game getGame() {
         return game;
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 }

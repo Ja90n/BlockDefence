@@ -26,9 +26,9 @@ public class GameRunnable extends BukkitRunnable {
     private Game game;
 
     public GameRunnable(BlockDefence blockDefence, Game game){
-        towerManager = blockDefence.getTowerManager();
-        enemyManager = blockDefence.getEnemyManager();
         this.game = game;
+        towerManager = game.getTowerManager();
+        enemyManager = game.getEnemyManager();
         runTaskTimer(blockDefence,0,1);
     }
 
@@ -48,6 +48,5 @@ public class GameRunnable extends BukkitRunnable {
             Bukkit.getPlayer(uuid).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText
                     (ChatColor.GOLD + "Coins: " + ChatColor.WHITE + Math.round(game.getCoins().get(uuid))));
         }
-
     }
 }

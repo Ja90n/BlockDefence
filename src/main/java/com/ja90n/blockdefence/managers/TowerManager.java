@@ -1,6 +1,7 @@
 package com.ja90n.blockdefence.managers;
 
 import com.ja90n.blockdefence.BlockDefence;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.Moveable;
 import com.ja90n.blockdefence.towers.Tower;
 import org.bukkit.Location;
@@ -10,13 +11,13 @@ import java.util.ArrayList;
 
 public class TowerManager {
 
-    private BlockDefence blockDefence;
+    private Game game;
     private ArrayList<Moveable> moveablesToSpawn;
     private ArrayList<Tower> towersToRemove;
     private ArrayList<Tower> towers;
 
-    public TowerManager(BlockDefence blockDefence){
-        this.blockDefence = blockDefence;
+    public TowerManager(Game game){
+        this.game = game;
         towers = new ArrayList<>();
         moveablesToSpawn = new ArrayList<>();
         towersToRemove = new ArrayList<>();
@@ -55,6 +56,7 @@ public class TowerManager {
         ArrayList<Tower> towersToRemove = new ArrayList<>();
         towers = towersToRemove;
         for (Tower tower : towersToRemove){
+            tower.getArmorStand().remove();
             tower.remove();
         }
         towersToRemove.clear();

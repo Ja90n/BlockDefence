@@ -2,6 +2,7 @@ package com.ja90n.blockdefence.managers;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.Tower;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -11,12 +12,12 @@ import java.util.List;
 
 public class EnemyManager {
 
-    private BlockDefence blockDefence;
+    private Game game;
     private ArrayList<Enemy> enemies;
     private ArrayList<Enemy> enemiesToRemove;
 
-    public EnemyManager(BlockDefence blockDefence){
-        this.blockDefence = blockDefence;
+    public EnemyManager(Game game){
+        this.game = game;
         enemies = new ArrayList<>();
         enemiesToRemove = new ArrayList<>();
     }
@@ -65,6 +66,7 @@ public class EnemyManager {
         ArrayList<Enemy> enemiesToRemove = new ArrayList<>();
         enemies = enemiesToRemove;
         for (Enemy enemy : enemiesToRemove){
+            enemy.getArmorStand().remove();
             enemy.remove();
         }
         enemiesToRemove.clear();

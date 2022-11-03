@@ -2,7 +2,9 @@ package com.ja90n.blockdefence.towers.spawns;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.Moveable;
+import com.ja90n.blockdefence.towers.PatrolTower;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -10,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +20,7 @@ import java.util.Collections;
 
 public class PatrolCar implements Moveable {
 
-    private BlockDefence blockDefence;
+    private PatrolTower patrolTower;
     private ArrayList<Location> path;
     private ArmorStand armorStand;
     // Cooldown in ticks
@@ -27,9 +30,10 @@ public class PatrolCar implements Moveable {
     private double health;
     private int shootCooldown = 0;
 
-    public PatrolCar(BlockDefence blockDefence){
-        this.blockDefence = blockDefence;
-        path = reverseArrayList(blockDefence.getPathGenerator().getPath(1));
+    public PatrolCar(PatrolTower patrolTower){
+        this.patrolTower = patrolTower;
+
+        path = reverseArrayList(BlockDefence.getInstance().getPathGenerator().getPath(1));
         Location location = path.get(0);
 
         fireRate = 20;
@@ -78,13 +82,15 @@ public class PatrolCar implements Moveable {
         getPath().remove(0);
 
         if (!armorStand.getNearbyEntities(0.2,0.2,0.2).isEmpty()){
-            ArrayList<Enemy> enemies = blockDefence.getEnemyManager().getEnemies(armorStand.getNearbyEntities(0.2,0.2,0.2));
+            ArrayList<Enemy> enemies = patrolTower.getGame().getEnemyManager().getEnemies(armorStand.getNearbyEntities(0.2,0.2,0.2));
             if (!enemies.isEmpty()){
                 for (Enemy enemy : enemies){
                     if (enemy.getHealth() > health){
+                        patrolTower.addTotalDamage(health);
                         enemy.damage(health);
                         remove();
                     } else {
+                        patrolTower.addTotalDamage(enemy.getHealth());
                         health = health - enemy.getHealth();
                         enemy.remove();
                     }
@@ -106,8 +112,6 @@ public class PatrolCar implements Moveable {
                 Enemy target = blockDefence.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
                 if (target != null){
                     target.damage(damage);
-                    Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(186, 9, 9), 1.0F);
-                    target.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target.getArmorStand().getLocation().add(0,0.5,0), 10, dustOptions);
                     armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
                             .subtract(armorStand.getLocation().toVector())));
                     shootCooldown = 0;
@@ -126,7 +130,22 @@ public class PatrolCar implements Moveable {
     }
 
     @Override
+    public Inventory getTowerMenu() {
+        return null;
+    }
+
+    @Override
     public ArmorStand getArmorStand() {
         return armorStand;
+    }
+
+    @Override
+    public Game getGame() {
+        return patrolTower.getGame();
+    }
+
+    @Override
+    public double getTotalValue() {
+        return 0;
     }
 }

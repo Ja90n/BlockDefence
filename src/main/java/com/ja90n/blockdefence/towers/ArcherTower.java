@@ -2,6 +2,7 @@ package com.ja90n.blockdefence.towers;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
+import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -10,6 +11,7 @@ import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class ArcherTower implements Tower {
@@ -20,14 +22,14 @@ public class ArcherTower implements Tower {
     private int fireRate;
     private double damage;
     private double range;
-
-    private BlockDefence blockDefence;
-
+    private Game game;
     private int shootCooldown = 0;
 
-    public ArcherTower(Location location, BlockDefence blockDefence){
+    private double totalValue;
 
-        this.blockDefence = blockDefence;
+    public ArcherTower(Location location, Game game){
+
+        this.game = game;
 
         fireRate = 20;
         damage = 1;
@@ -46,11 +48,9 @@ public class ArcherTower implements Tower {
         shootCooldown++;
         if (shootCooldown == fireRate){
             if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
-                Enemy target = blockDefence.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
+                Enemy target = game.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
                 if (target != null){
                     target.damage(damage);
-                    Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(186, 9, 9), 1.0F);
-                    target.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target.getArmorStand().getLocation().add(0,0.5,0), 10, dustOptions);
                     armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
                             .subtract(armorStand.getLocation().toVector())));
                 }
@@ -65,7 +65,22 @@ public class ArcherTower implements Tower {
     }
 
     @Override
+    public Inventory getTowerMenu() {
+        return null;
+    }
+
+    @Override
     public ArmorStand getArmorStand() {
         return armorStand;
+    }
+
+    @Override
+    public Game getGame() {
+        return game;
+    }
+
+    @Override
+    public double getTotalValue() {
+        return totalValue;
     }
 }
