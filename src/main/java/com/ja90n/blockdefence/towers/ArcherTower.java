@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -60,7 +61,7 @@ public class ArcherTower implements Tower {
     }
 
     @Override
-    public void upgrade() {
+    public boolean upgrade(Player player) {
 
     }
 

@@ -134,11 +134,14 @@ public class InteractEvent implements Listener {
                         case 22:
                             // Upgrades tower
                             tower.upgrade();
+                            player.closeInventory();
+                            player.openInventory(tower.getTowerMenu());
                             break;
                         case 34:
                             // Sells tower
                             game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) + tower.getTotalValue());
                             tower.remove();
+                            player.closeInventory();
                             break;
                     }
                 }

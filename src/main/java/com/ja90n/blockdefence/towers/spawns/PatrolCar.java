@@ -3,22 +3,19 @@ package com.ja90n.blockdefence.towers.spawns;
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
-import com.ja90n.blockdefence.towers.Moveable;
+import com.ja90n.blockdefence.towers.TowerMoveable;
 import com.ja90n.blockdefence.towers.PatrolTower;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
-public class PatrolCar implements Moveable {
+public class PatrolCar implements TowerMoveable {
 
     private PatrolTower patrolTower;
     private ArrayList<Location> path;
@@ -48,17 +45,6 @@ public class PatrolCar implements Moveable {
         //
         armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,4));
 
-    }
-
-    public ArrayList<Location> reverseArrayList(ArrayList<Location> alist) {
-        // Arraylist for storing reversed elements
-        ArrayList<Location> revArrayList = new ArrayList<Location>();
-        for (int i = alist.size() - 1; i >= 0; i--) {
-            // Append the elements in reverse order
-            revArrayList.add(alist.get(i));
-        }
-        // Return the reversed arraylist
-        return revArrayList;
     }
 
     @Override
@@ -100,11 +86,6 @@ public class PatrolCar implements Moveable {
     }
 
     @Override
-    public ArrayList<Location> getPath() {
-        return path;
-    }
-
-    @Override
     public void shoot() {
         /*
         if (shootCooldown == fireRate){
@@ -124,16 +105,18 @@ public class PatrolCar implements Moveable {
          */
     }
 
-    @Override
-    public void upgrade() {
-
+    public ArrayList<Location> reverseArrayList(ArrayList<Location> alist) {
+        // Arraylist for storing reversed elements
+        ArrayList<Location> revArrayList = new ArrayList<Location>();
+        for (int i = alist.size() - 1; i >= 0; i--) {
+            // Append the elements in reverse order
+            revArrayList.add(alist.get(i));
+        }
+        // Return the reversed arraylist
+        return revArrayList;
     }
 
-    @Override
-    public Inventory getTowerMenu() {
-        return null;
-    }
-
+    // Getters
     @Override
     public ArmorStand getArmorStand() {
         return armorStand;
@@ -145,7 +128,21 @@ public class PatrolCar implements Moveable {
     }
 
     @Override
+    public ArrayList<Location> getPath() {
+        return path;
+    }
+
+    // Dummy returns because it is not necessary for this tower
+    @Override
     public double getTotalValue() {
         return 0;
     }
+    @Override
+    public double getStarterPrice() { return 0; }
+    @Override
+    public Inventory getTowerMenu() {
+        return null;
+    }
+    @Override
+    public boolean upgrade(Player player) { return false; }
 }

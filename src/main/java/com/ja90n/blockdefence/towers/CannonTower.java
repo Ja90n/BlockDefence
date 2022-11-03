@@ -60,7 +60,8 @@ public class CannonTower implements Tower {
                             Enemy target1 = game.getEnemyManager().getEnemy((ArmorStand) entity);
                             if (target1 != null){
                                 target1.damage(damage / 2);
-                                target1.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target1.getArmorStand().getLocation().add(0,0.5,0), 10);
+                                Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(186, 9, 9), 1.0F);
+                                target1.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target1.getArmorStand().getLocation().add(0,0.5,0), 10,dustOptions);
                             }
                         }
                     }
@@ -71,7 +72,7 @@ public class CannonTower implements Tower {
     }
 
     @Override
-    public void upgrade() {
+    public boolean upgrade() {
 
     }
 

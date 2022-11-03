@@ -8,10 +8,13 @@ import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.UUID;
 
 public class PatrolTower implements Tower {
 
@@ -21,6 +24,8 @@ public class PatrolTower implements Tower {
     // Cooldown in ticks
     private int fireRate;
     private Game game;
+
+    private double starterPrice;
     private int shootCooldown = 0;
     private double totalDamage;
     private double totalValue;
@@ -32,6 +37,7 @@ public class PatrolTower implements Tower {
         this.game = game;
 
         fireRate = 80;
+        starterPrice = 400.0;
 
         armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         armorStand.setBasePlate(false);
@@ -43,18 +49,22 @@ public class PatrolTower implements Tower {
         totalValue = 0;
 
         // Generate Tower Menu
-        towerMenu = Bukkit.createInventory(null,45,ChatColor.GREEN + "Patrol tower");
+        towerMenu = Bukkit.createInventory(null,45,ChatColor.DARK_GREEN + "Patrol tower");
 
         // Frame
         for (int i : new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
-            towerMenu.setItem(i,createItem(Material.GREEN_STAINED_GLASS_PANE,ChatColor.GREEN + " "));
+            towerMenu.setItem(i,game.createItem(Material.GREEN_STAINED_GLASS_PANE,ChatColor.GREEN + " "));
         }
 
         // Upgrade button
-        towerMenu.setItem(22,createItem(Material.EMERALD, ChatColor.GREEN + "Upgrade"));
+        towerMenu.setItem(22,game.createItem(Material.EMERALD, ChatColor.GREEN + "Upgrade"));
 
         // Sell button
-        towerMenu.setItem(34,createItem(Material.BARRIER, ChatColor.RED + "Sell"));
+        towerMenu.setItem(34,game.createItem(Material.BARRIER, ChatColor.RED + "Sell"));
+
+        // Total damage statistic
+        towerMenu.setItem(19,game.createItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED +
+                "Damage: " + ChatColor.WHITE + totalDamage));
     }
 
     @Override
@@ -67,33 +77,17 @@ public class PatrolTower implements Tower {
     }
 
     @Override
-    public void upgrade() {
-
-    }
-
-    @Override
-    public Inventory getTowerMenu() {
-
-        return null;
-    }
-
-    @Override
-    public ArmorStand getArmorStand() {
-        return armorStand;
+    public boolean upgrade(Player player) {
+        return false;
     }
 
     public void addTotalDamage(double damage){
-        totalDamage = totalValue + damage;
+        totalDamage = totalDamage + damage;
+        towerMenu.setItem(19,game.createItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED +
+                "Damage: " + ChatColor.WHITE + totalDamage));
     }
 
-    private ItemStack createItem(Material material,String name){
-        ItemStack itemStack = new ItemStack(material);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(name);
-        itemStack.setItemMeta(itemMeta);
-        return itemStack;
-    }
-
+    // Getters
     public Game getGame() {
         return game;
     }
@@ -101,5 +95,19 @@ public class PatrolTower implements Tower {
     @Override
     public double getTotalValue() {
         return totalValue;
+    }
+    @Override
+    public double getStarterPrice() {
+        return starterPrice;
+    }
+
+    @Override
+    public Inventory getTowerMenu() {
+        return towerMenu;
+    }
+
+    @Override
+    public ArmorStand getArmorStand() {
+        return armorStand;
     }
 }

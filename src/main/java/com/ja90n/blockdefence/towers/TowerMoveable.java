@@ -4,7 +4,7 @@ import org.bukkit.Location;
 
 import java.util.ArrayList;
 
-public interface Moveable extends Tower{
+public interface TowerMoveable extends Tower{
     void move();
     ArrayList<Location> getPath();
 }

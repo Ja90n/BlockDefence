@@ -1,8 +1,7 @@
 package com.ja90n.blockdefence.managers;
 
-import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.instances.Game;
-import com.ja90n.blockdefence.towers.Moveable;
+import com.ja90n.blockdefence.towers.TowerMoveable;
 import com.ja90n.blockdefence.towers.Tower;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 public class TowerManager {
 
     private Game game;
-    private ArrayList<Moveable> moveablesToSpawn;
+    private ArrayList<TowerMoveable> moveablesToSpawn;
     private ArrayList<Tower> towersToRemove;
     private ArrayList<Tower> towers;
 
@@ -36,7 +35,7 @@ public class TowerManager {
         return null;
     }
 
-    public void addMoveablesToSpawn(Moveable moveables){
+    public void addMoveablesToSpawn(TowerMoveable moveables){
         moveablesToSpawn.add(moveables);
     }
 

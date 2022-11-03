@@ -7,6 +7,8 @@ import com.ja90n.blockdefence.managers.TowerManager;
 import com.ja90n.blockdefence.runnables.GameRunnable;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -48,15 +50,12 @@ public class Game {
     public HashMap<UUID, Double> getCoins() {
         return coins;
     }
-
     public GameRunnable getGameRunnable() {
         return gameRunnable;
     }
-
     public int getWave() {
         return wave;
     }
-
     public TowerManager getTowerManager() {
         return towerManager;
     }
