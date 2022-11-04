@@ -91,6 +91,12 @@ public class Arena {
         }
     }
 
+    public void sendActionBar(String message){
+        for (UUID uuid : getPlayers()){
+            Bukkit.getPlayer(uuid).spigot().sendMessage(ChatMessageType.ACTION_BAR,TextComponent.fromLegacyText(message));
+        }
+    }
+
 
     // Getters
     public List<UUID> getPlayers() {

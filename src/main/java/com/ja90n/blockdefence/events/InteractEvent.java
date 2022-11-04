@@ -105,14 +105,26 @@ public class InteractEvent implements Listener {
                 event.setCancelled(true);
                 switch (event.getSlot()){
                     case 0:
-                        game.getTowerManager().addTower(new ArcherTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
-                        break;
+                        if (game.getCoins().get(player.getUniqueId()) >= 100){
+                            game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) - 100);
+                            game.getTowerManager().addTower(new ArcherTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
+                            player.closeInventory();
+                            break;
+                        }
                     case 1:
-                        game.getTowerManager().addTower(new PatrolTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
-                        break;
+                        if (game.getCoins().get(player.getUniqueId()) >= 400){
+                            game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) - 400);
+                            game.getTowerManager().addTower(new PatrolTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
+                            player.closeInventory();
+                            break;
+                        }
                     case 2:
-                        game.getTowerManager().addTower(new CannonTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
-                        break;
+                        if (game.getCoins().get(player.getUniqueId()) >= 300){
+                            game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) - 300);
+                            game.getTowerManager().addTower(new CannonTower(clickedLocation.get(event.getWhoClicked().getUniqueId()), game));
+                            player.closeInventory();
+                            break;
+                        }
                 }
                 event.getWhoClicked().closeInventory();
                 clickedLocation.remove(event.getWhoClicked().getUniqueId());
@@ -133,9 +145,14 @@ public class InteractEvent implements Listener {
                     switch (event.getSlot()){
                         case 22:
                             // Upgrades tower
-                            tower.upgrade();
-                            player.closeInventory();
-                            player.openInventory(tower.getTowerMenu());
+                            if (game.getCoins().get(player.getUniqueId()) > tower.getUpgradePrice()){
+                                game.getCoins().put(player.getUniqueId(), game.getCoins().get(player.getUniqueId()) - tower.getUpgradePrice());
+                                tower.upgrade();
+                                player.closeInventory();
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have enough coins to upgrade this tower!");
+                                player.closeInventory();
+                            }
                             break;
                         case 34:
                             // Sells tower

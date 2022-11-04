@@ -11,6 +11,8 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.UUID;
@@ -40,7 +42,6 @@ public class GameRunnable extends BukkitRunnable {
             enemy.move();
         }
         for (UUID uuid : game.getCoins().keySet()){
-            game.getCoins().put(uuid,game.getCoins().get(uuid)+0.2);
             Bukkit.getPlayer(uuid).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText
                     (ChatColor.GOLD + "Coins: " + ChatColor.WHITE + Math.round(game.getCoins().get(uuid))));
         }

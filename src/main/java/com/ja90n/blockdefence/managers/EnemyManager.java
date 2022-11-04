@@ -4,6 +4,7 @@ import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.Tower;
+import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 

@@ -34,8 +34,8 @@ public interface Enemy {
         getPath().remove(0);
     }
     default void finished(){
+        getGame().castleDamage(getHealth());
         remove();
-        Bukkit.broadcastMessage("an enemy with " + getHealth() + " health made it to the end");
     }
     default void remove(){
         getGame().getEnemyManager().addEnemyToRemove(this);

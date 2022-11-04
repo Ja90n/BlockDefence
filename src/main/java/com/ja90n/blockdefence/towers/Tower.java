@@ -8,7 +8,7 @@ import org.bukkit.inventory.Inventory;
 
 public interface Tower {
     void shoot();
-    boolean upgrade(Player player);
+    void upgrade();
     default void remove(){
         getGame().getTowerManager().addTowerToRemove(this);
     }
@@ -17,6 +17,7 @@ public interface Tower {
     Game getGame();
     double getTotalValue();
     double getStarterPrice();
+    double getUpgradePrice();
     Inventory getTowerMenu();
     ArmorStand getArmorStand();
 }

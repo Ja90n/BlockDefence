@@ -5,6 +5,7 @@ import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.spawns.PatrolCar;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
+import com.ja90n.blockdefence.util.TowerMenuGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -29,6 +30,7 @@ public class PatrolTower implements Tower {
     private int shootCooldown = 0;
     private double totalDamage;
     private double totalValue;
+    private int upgradeState;
 
     private Inventory towerMenu;
 
@@ -36,49 +38,42 @@ public class PatrolTower implements Tower {
 
         this.game = game;
 
-        fireRate = 80;
+        fireRate = 200;
         starterPrice = 400.0;
+        upgradeState = 0;
 
         armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         armorStand.setBasePlate(false);
         armorStand.setInvisible(true);
+        armorStand.setGravity(false);
         armorStand.setInvulnerable(true);
         armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,5));
 
         totalDamage = 0;
-        totalValue = 0;
+        totalValue = starterPrice;
 
-        // Generate Tower Menu
-        towerMenu = Bukkit.createInventory(null,45,ChatColor.DARK_GREEN + "Patrol tower");
-
-        // Frame
-        for (int i : new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
-            towerMenu.setItem(i,game.createItem(Material.GREEN_STAINED_GLASS_PANE,ChatColor.GREEN + " "));
-        }
-
-        // Upgrade button
-        towerMenu.setItem(22,game.createItem(Material.EMERALD, ChatColor.GREEN + "Upgrade"));
-
-        // Sell button
-        towerMenu.setItem(34,game.createItem(Material.BARRIER, ChatColor.RED + "Sell"));
-
-        // Total damage statistic
-        towerMenu.setItem(19,game.createItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED +
-                "Damage: " + ChatColor.WHITE + totalDamage));
+        towerMenu = new TowerMenuGenerator().generateTowerMenu
+                (Material.GREEN_STAINED_GLASS_PANE,ChatColor.DARK_GREEN + "Patrol tower",game);
     }
 
     @Override
     public void shoot() {
         shootCooldown++;
         if (shootCooldown == fireRate){
-            game.getTowerManager().addMoveablesToSpawn(new PatrolCar(this));
+            game.getTowerManager().addMoveablesToSpawn(new PatrolCar(this,upgradeState));
             shootCooldown = 0;
         }
     }
 
     @Override
-    public boolean upgrade(Player player) {
-        return false;
+    public void upgrade() {
+        totalValue = totalValue + getUpgradePrice();
+        upgradeState = upgradeState + 1;
+        switch (upgradeState){
+            case 1:
+                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.STONE_AXE,5));
+                break;
+        }
     }
 
     public void addTotalDamage(double damage){
@@ -99,6 +94,18 @@ public class PatrolTower implements Tower {
     @Override
     public double getStarterPrice() {
         return starterPrice;
+    }
+
+    @Override
+    public double getUpgradePrice() {
+        switch (upgradeState){
+            case 0:
+                return 400;
+            case 1:
+                return 800;
+            default:
+                return 999999999;
+        }
     }
 
     @Override

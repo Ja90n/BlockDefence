@@ -9,11 +9,15 @@ import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class PatrolCar implements TowerMoveable {
 
@@ -22,29 +26,38 @@ public class PatrolCar implements TowerMoveable {
     private ArmorStand armorStand;
     // Cooldown in ticks
     private int fireRate;
+    private int upgradeState;
     private double damage;
     private double range;
     private double health;
     private int shootCooldown = 0;
 
-    public PatrolCar(PatrolTower patrolTower){
+    public PatrolCar(PatrolTower patrolTower, int upgradeState){
         this.patrolTower = patrolTower;
+        this.upgradeState = upgradeState;
 
         path = reverseArrayList(BlockDefence.getInstance().getPathGenerator().getPath(1));
         Location location = path.get(0);
 
-        fireRate = 20;
+        fireRate = 5;
         damage = 1;
-        range = 5;
+        range = 2;
         health = 20.0;
 
         armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         armorStand.setBasePlate(false);
         armorStand.setInvisible(true);
         armorStand.setInvulnerable(true);
-        //
-        armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,4));
+        armorStand.setGravity(false);
 
+        switch (upgradeState){
+            case 0:
+                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,4));
+                break;
+            case 1:
+                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.STONE_AXE,4));
+                break;
+        }
     }
 
     @Override
@@ -73,11 +86,17 @@ public class PatrolCar implements TowerMoveable {
                 for (Enemy enemy : enemies){
                     if (enemy.getHealth() > health){
                         patrolTower.addTotalDamage(health);
+                        for (UUID uuid : getGame().getCoins().keySet()){
+                            getGame().getCoins().put(uuid,getGame().getCoins().get(uuid) + health);
+                        }
                         enemy.damage(health);
                         remove();
                     } else {
                         patrolTower.addTotalDamage(enemy.getHealth());
                         health = health - enemy.getHealth();
+                        for (UUID uuid : getGame().getCoins().keySet()){
+                            getGame().getCoins().put(uuid,getGame().getCoins().get(uuid) + enemy.getHealth());
+                        }
                         enemy.remove();
                     }
                 }
@@ -85,25 +104,43 @@ public class PatrolCar implements TowerMoveable {
         }
     }
 
-    @Override
-    public void shoot() {
-        /*
-        if (shootCooldown == fireRate){
-            if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
-                Enemy target = blockDefence.getEnemyManager().getFirstEnemy(armorStand.getNearbyEntities(range,range,range));
-                if (target != null){
-                    target.damage(damage);
-                    armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
-                            .subtract(armorStand.getLocation().toVector())));
-                    shootCooldown = 0;
+    public static Entity[] getNearbyEntities(Location l, int radius){
+        int chunkRadius = radius < 16 ? 1 : (radius - (radius % 16))/16;
+        HashSet<Entity> radiusEntities = new HashSet<Entity>();
+        for (int chX = 0 -chunkRadius; chX <= chunkRadius; chX ++){
+            for (int chZ = 0 -chunkRadius; chZ <= chunkRadius; chZ++){
+                int x=(int) l.getX(),y=(int) l.getY(),z=(int) l.getZ();
+                for (Entity e : new Location(l.getWorld(),x+(chX*16),y,z+(chZ*16)).getChunk().getEntities()){
+                    if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock()) radiusEntities.add(e);
                 }
             }
-        } else {
-            shootCooldown++;
         }
-
-         */
+        return radiusEntities.toArray(new Entity[radiusEntities.size()]);
     }
+
+    @Override
+    public void shoot() {
+        if (upgradeState >= 1){
+            if (shootCooldown == fireRate){
+                if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
+                    Enemy target = getGame().getEnemyManager().getFirstEnemy(Arrays.asList(getNearbyEntities(armorStand.getLocation(), (int) range)));
+                    if (target != null){
+                        target.damage(damage);
+                        for (UUID uuid : getGame().getCoins().keySet()){
+                            getGame().getCoins().put(uuid,getGame().getCoins().get(uuid) + damage);
+                        }
+                        armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
+                                .subtract(armorStand.getLocation().toVector())));
+                        shootCooldown = 0;
+                    }
+                }
+            } else {
+                shootCooldown++;
+            }
+        }
+    }
+
+
 
     public ArrayList<Location> reverseArrayList(ArrayList<Location> alist) {
         // Arraylist for storing reversed elements
@@ -140,9 +177,11 @@ public class PatrolCar implements TowerMoveable {
     @Override
     public double getStarterPrice() { return 0; }
     @Override
+    public double getUpgradePrice() { return 0; }
+    @Override
     public Inventory getTowerMenu() {
         return null;
     }
     @Override
-    public boolean upgrade(Player player) { return false; }
+    public void upgrade() {}
 }
