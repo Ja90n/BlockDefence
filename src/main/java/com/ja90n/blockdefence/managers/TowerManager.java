@@ -3,8 +3,13 @@ package com.ja90n.blockdefence.managers;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.TowerMoveable;
 import com.ja90n.blockdefence.towers.Tower;
+import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
@@ -52,13 +57,10 @@ public class TowerManager {
     }
 
     public void clearTowers(){
-        ArrayList<Tower> towersToRemove = new ArrayList<>();
-        towers = towersToRemove;
-        for (Tower tower : towersToRemove){
+        for (Tower tower : towers){
             tower.getArmorStand().remove();
-            tower.remove();
         }
-        towersToRemove.clear();
+        towers.clear();
     }
 
     public void addTowerToRemove(Tower tower){
@@ -80,5 +82,15 @@ public class TowerManager {
             towersToRemove.clear();
         }
         return towers;
+    }
+
+    public ArmorStand getArmorStand(ItemStack itemStack, Location location){
+        ArmorStand armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+        armorStand.setBasePlate(false);
+        armorStand.setInvisible(true);
+        armorStand.setGravity(false);
+        armorStand.setInvulnerable(true);
+        armorStand.getEquipment().setHelmet(itemStack);
+        return armorStand;
     }
 }

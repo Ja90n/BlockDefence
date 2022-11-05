@@ -1,56 +1,40 @@
 package com.ja90n.blockdefence.towers;
 
-import com.ja90n.blockdefence.BlockDefence;
-import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.towers.spawns.PatrolCar;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import com.ja90n.blockdefence.util.TowerMenuGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.UUID;
 
 public class PatrolTower implements Tower {
 
-    private Location location;
-    private ArmorStand armorStand;
-
-    // Cooldown in ticks
-    private int fireRate;
-    private Game game;
-
-    private double starterPrice;
-    private int shootCooldown = 0;
+    private final Game game;
+    private final ArmorStand armorStand;
+    private final Inventory towerMenu;
+    private final double starterPrice;
     private double totalDamage;
     private double totalValue;
     private int upgradeState;
+    private int fireRate; // Cooldown in ticks (20/s)
+    private int shootCooldown = 0;
 
-    private Inventory towerMenu;
 
     public PatrolTower(Location location, Game game){
-
         this.game = game;
 
         fireRate = 200;
         starterPrice = 400.0;
         upgradeState = 0;
 
-        armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
-        armorStand.setBasePlate(false);
-        armorStand.setInvisible(true);
-        armorStand.setGravity(false);
-        armorStand.setInvulnerable(true);
-        armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,5));
-
         totalDamage = 0;
         totalValue = starterPrice;
+
+        armorStand = game.getTowerManager().getArmorStand
+                (new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,5), location);
 
         towerMenu = new TowerMenuGenerator().generateTowerMenu
                 (Material.GREEN_STAINED_GLASS_PANE,ChatColor.DARK_GREEN + "Patrol tower",game);
@@ -106,6 +90,16 @@ public class PatrolTower implements Tower {
             default:
                 return 999999999;
         }
+    }
+
+    @Override
+    public double getTotalDamage() {
+        return totalDamage;
+    }
+
+    @Override
+    public void setTotalDamage(double damage) {
+        totalDamage = damage;
     }
 
     @Override

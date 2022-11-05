@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class Game {
@@ -55,7 +56,7 @@ public class Game {
         Location location = path.get(path.size()-1);
 
         // Castle health indicator
-        armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+        armorStand = (ArmorStand) location.getWorld().spawnEntity(location.add(0,-1,0), EntityType.ARMOR_STAND);
         armorStand.setBasePlate(false);
         armorStand.setInvisible(true);
         armorStand.setGravity(false);
@@ -78,6 +79,20 @@ public class Game {
         }
     }
 
+    public void addCoins(double damage){
+        for (UUID uuid : getCoins().keySet()){
+            getCoins().put(uuid,getCoins().get(uuid) + damage);
+        }
+    }
+
+    public void addCoins(double damage,Player player){
+        getCoins().put(player.getUniqueId(),getCoins().get(player.getUniqueId()) + damage);
+    }
+
+    public void removeCoins(double coins, Player player){
+        getCoins().put(player.getUniqueId(),getCoins().get(player.getUniqueId()) - coins);
+    }
+
     public HashMap<UUID, Double> getCoins() {
         return coins;
     }
@@ -93,10 +108,31 @@ public class Game {
     public EnemyManager getEnemyManager() {
         return enemyManager;
     }
+    public ArmorStand getArmorStand() {
+        return armorStand;
+    }
     public ItemStack createItem(Material material, String name){
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(name);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+    public ItemStack createItem(Material material, String name,String lore){
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(name);
+        List<String> loreList = new ArrayList<>();
+        loreList.add(lore);
+        itemMeta.setLore(loreList);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+    public ItemStack createItem(Material material, String name, List<String> lore){
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(name);
+        itemMeta.setLore(lore);
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }

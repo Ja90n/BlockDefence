@@ -39,14 +39,15 @@ public class Arena {
     public void stopGame(){
         if (gameState.equals(GameState.LIVE)){
             game.getGameRunnable().cancel();
+            game.getTowerManager().clearTowers();
+            game.getEnemyManager().clearEnemies();
+            game.getArmorStand().remove();
             sendMessage("ggame is stopping");
             for (UUID uuid : players){
                 removePlayer(Bukkit.getPlayer(uuid), true);
             }
             players.clear();
             gameState = GameState.RECRUITING;
-            game.getTowerManager().clearTowers();
-            game.getEnemyManager().clearEnemies();
             game = new Game(blockDefence,this);
         }
     }

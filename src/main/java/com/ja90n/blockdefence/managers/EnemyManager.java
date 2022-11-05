@@ -9,6 +9,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class EnemyManager {
@@ -64,16 +65,14 @@ public class EnemyManager {
     }
 
     public void clearEnemies(){
-        ArrayList<Enemy> enemiesToRemove = new ArrayList<>();
-        enemies = enemiesToRemove;
-        for (Enemy enemy : enemiesToRemove){
+        for (Enemy enemy : enemies){
             enemy.getArmorStand().remove();
-            enemy.remove();
         }
-        enemiesToRemove.clear();
+        enemies.clear();
     }
 
-    public Enemy getFirstEnemy(List<Entity> entities){
+    public Enemy getFirstEnemy(Location location, double range){
+        Entity[] entities = getNearbyEntities(location,range);
         ArrayList<Enemy> targetedEnemies = new ArrayList<>();
         for (Entity entity : entities){
             if (entity instanceof ArmorStand){
@@ -84,7 +83,7 @@ public class EnemyManager {
             }
         }
         Enemy firstEnemy = null;
-        for (Enemy enemy : enemies){
+        for (Enemy enemy : targetedEnemies){
             if (firstEnemy == null){
                 firstEnemy = enemy;
             } else {
@@ -94,5 +93,19 @@ public class EnemyManager {
             }
         }
         return firstEnemy;
+    }
+
+    public Entity[] getNearbyEntities(Location l, double radius){
+        double chunkRadius = radius < 16 ? 1 : (radius - (radius % 16))/16;
+        HashSet<Entity> radiusEntities = new HashSet<Entity>();
+        for (double chX = 0 -chunkRadius; chX <= chunkRadius; chX ++){
+            for (double chZ = 0 -chunkRadius; chZ <= chunkRadius; chZ++){
+                double x=l.getX(),y=l.getY(),z=l.getZ();
+                for (Entity e : new Location(l.getWorld(),x+(chX*16),y,z+(chZ*16)).getChunk().getEntities()){
+                    if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock()) radiusEntities.add(e);
+                }
+            }
+        }
+        return radiusEntities.toArray(new Entity[radiusEntities.size()]);
     }
 }

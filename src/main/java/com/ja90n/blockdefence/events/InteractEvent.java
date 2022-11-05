@@ -145,7 +145,7 @@ public class InteractEvent implements Listener {
                     switch (event.getSlot()){
                         case 22:
                             // Upgrades tower
-                            if (game.getCoins().get(player.getUniqueId()) > tower.getUpgradePrice()){
+                            if (game.getCoins().get(player.getUniqueId()) >= tower.getUpgradePrice()){
                                 game.getCoins().put(player.getUniqueId(), game.getCoins().get(player.getUniqueId()) - tower.getUpgradePrice());
                                 tower.upgrade();
                                 player.closeInventory();
@@ -156,7 +156,7 @@ public class InteractEvent implements Listener {
                             break;
                         case 34:
                             // Sells tower
-                            game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) + tower.getTotalValue());
+                            game.getCoins().put(player.getUniqueId(),game.getCoins().get(player.getUniqueId()) + tower.getTotalValue() / 2);
                             tower.remove();
                             player.closeInventory();
                             break;

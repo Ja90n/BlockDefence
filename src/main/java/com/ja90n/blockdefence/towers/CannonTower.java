@@ -1,6 +1,5 @@
 package com.ja90n.blockdefence.towers;
 
-import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
@@ -8,13 +7,11 @@ import com.ja90n.blockdefence.util.TowerMenuGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class CannonTower implements Tower {
@@ -33,102 +30,107 @@ public class CannonTower implements Tower {
 
     private double totalValue;
 
-    private Game game;
-    private int upgradeState;
+    private CanonUpgradeStates canonUpgradeStates;
 
+    private Game game;
     private int shootCooldown = 0;
 
     public CannonTower(Location location, Game game){
-
         this.game = game;
 
-        fireRate = 80;
-        damage = 10;
-        splashDamage = damage / 2;
-        range = 1;
+        canonUpgradeStates = CanonUpgradeStates.STANDARDCANNON;
 
+        fireRate = canonUpgradeStates.getFirerate();
+        damage = canonUpgradeStates.getDamage();
+        range = canonUpgradeStates.getRange();
+
+        splashDamage = damage / 4;
+
+        totalValue = 300;
         totalDamage = 0;
-        upgradeState = 0;
 
-        armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
-        armorStand.setBasePlate(false);
-        armorStand.setInvisible(true);
-        armorStand.setGravity(false);
-        armorStand.setInvulnerable(true);
-        armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,1));
+        armorStand = game.getTowerManager().getArmorStand
+                (new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,1), location);
 
         towerMenu = new TowerMenuGenerator().generateTowerMenu
                 (Material.RED_STAINED_GLASS_PANE,ChatColor.DARK_RED + "Canon tower",game);
+
+        new TowerMenuGenerator().updateTowerMenu(this);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.BLUE + "Fire rate: " + ChatColor.WHITE + fireRate);
+        lore.add(ChatColor.RED + "Damage: " + ChatColor.WHITE + damage);
+        lore.add(ChatColor.GREEN + "Range: " + ChatColor.WHITE + range);
+        towerMenu.setItem(10,game.createItem(Material.PAPER,"Statistics",lore));
     }
 
     @Override
     public void shoot() {
         shootCooldown++;
-        if (shootCooldown == fireRate){
+        if (shootCooldown >= fireRate){
             if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
-                Enemy target = game.getEnemyManager().getFirstEnemy(Arrays.asList(getNearbyEntities(armorStand.getLocation(), (int) range)));
+                Enemy target = game.getEnemyManager().getFirstEnemy(armorStand.getLocation(),range);
                 if (target != null){
                     target.damage(damage);
                     addTotalDamage(damage);
-                    for (UUID uuid : game.getCoins().keySet()){
-                        game.getCoins().put(uuid,game.getCoins().get(uuid) + damage);
-                    }
+                    game.addCoins(damage);
                     armorStand.getLocation().getWorld().playEffect(armorStand.getLocation(), Effect.SMOKE,4);
+
                     armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
                             .subtract(armorStand.getLocation().toVector())));
 
                     // Splash damage calculations
-                    for (Entity entity : target.getArmorStand().getNearbyEntities(0.5,0.5,0.5)){
+                    for (Entity entity : target.getArmorStand().getNearbyEntities(range/3,range/3,range/3)){
                         if (entity instanceof ArmorStand){
                             Enemy target1 = game.getEnemyManager().getEnemy((ArmorStand) entity);
                             if (target1 != null){
                                 target1.damage(splashDamage);
                                 addTotalDamage(splashDamage);
-                                for (UUID uuid : game.getCoins().keySet()){
-                                    game.getCoins().put(uuid,game.getCoins().get(uuid) + splashDamage / 4);
-                                }
+                                game.addCoins(splashDamage / 2);
                                 Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(186, 9, 9), 1.0F);
                                 target1.getArmorStand().getWorld().spawnParticle(Particle.REDSTONE, target1.getArmorStand().getLocation().add(0,0.5,0), 10,dustOptions);
                             }
                         }
                     }
-                }
-            }
-            shootCooldown = 0;
-        }
-    }
-
-    public void addTotalDamage(double damage){
-        totalDamage = totalDamage + damage;
-        towerMenu.setItem(19,game.createItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED +
-                "Damage: " + ChatColor.WHITE + totalDamage));
-    }
-
-
-    public static Entity[] getNearbyEntities(Location l, int radius){
-        int chunkRadius = radius < 16 ? 1 : (radius - (radius % 16))/16;
-        HashSet<Entity> radiusEntities = new HashSet<Entity>();
-        for (int chX = 0 -chunkRadius; chX <= chunkRadius; chX ++){
-            for (int chZ = 0 -chunkRadius; chZ <= chunkRadius; chZ++){
-                int x=(int) l.getX(),y=(int) l.getY(),z=(int) l.getZ();
-                for (Entity e : new Location(l.getWorld(),x+(chX*16),y,z+(chZ*16)).getChunk().getEntities()){
-                    if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock()) radiusEntities.add(e);
+                    shootCooldown = 0;
                 }
             }
         }
-        return radiusEntities.toArray(new Entity[radiusEntities.size()]);
     }
 
     @Override
     public void upgrade() {
-        upgradeState++;
-        switch (upgradeState){
-            case 1:
-                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.STONE_AXE,1));
-                damage = damage / 2;
-                splashDamage = splashDamage * 2;
+
+        totalValue = totalValue + canonUpgradeStates.getUpgradePrice();
+
+        switch (canonUpgradeStates){
+            case STANDARDCANNON:
+                canonUpgradeStates = CanonUpgradeStates.NOVICECANNON;
+                break;
+            case NOVICECANNON:
+                canonUpgradeStates = CanonUpgradeStates.ADVANCEDCANNON;
+                break;
+            case ADVANCEDCANNON:
+                canonUpgradeStates = CanonUpgradeStates.WOWCANNON;
                 break;
         }
+        damage = canonUpgradeStates.getDamage();
+        fireRate = canonUpgradeStates.getFirerate();
+        range = canonUpgradeStates.getRange();
+
+        splashDamage = damage / 4;
+
+        shootCooldown = 0;
+
+        new TowerMenuGenerator().updateTowerMenu(this);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.BLUE + "Fire rate: " + ChatColor.WHITE + fireRate);
+        lore.add(ChatColor.RED + "Damage: " + ChatColor.WHITE + damage);
+        lore.add(ChatColor.GREEN + "Range: " + ChatColor.WHITE + range);
+        towerMenu.setItem(10,game.createItem(Material.PAPER,"Statistics",lore));
+
+        armorStand.getEquipment().setHelmet(canonUpgradeStates.getItemStack());
     }
 
     @Override
@@ -143,7 +145,7 @@ public class CannonTower implements Tower {
 
     @Override
     public Game getGame() {
-        return null;
+        return game;
     }
 
     @Override
@@ -153,18 +155,45 @@ public class CannonTower implements Tower {
 
     @Override
     public double getStarterPrice() {
-        return 0;
+        return 300;
     }
 
     @Override
     public double getUpgradePrice() {
-        switch (upgradeState){
-            case 0:
-                return 400;
-            case 1:
-                return 800;
-            default:
-                return 999999999;
+        return canonUpgradeStates.getUpgradePrice();
+    }
+
+    @Override
+    public double getTotalDamage() {
+        return totalDamage;
+    }
+
+    @Override
+    public void setTotalDamage(double damage) {
+        totalDamage = damage;
+    }
+
+    enum CanonUpgradeStates {
+        STANDARDCANNON(40, 10, 3, 600,new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,1)),
+        NOVICECANNON(30, 15, 3,1800,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
+        ADVANCEDCANNON(30, 20, 4,3200,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
+        WOWCANNON(20, 40, 5,999999999,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1));
+
+        private int fireRate;
+        private double damage,range,upgradePrice;
+        private ItemStack itemStack;
+
+        CanonUpgradeStates(int fireRate, double damage, double range, double upgradePrice, ItemStack itemStack) {
+            this.fireRate = fireRate;
+            this.damage = damage;
+            this.range = range;
+            this.upgradePrice = upgradePrice;
+            this.itemStack = itemStack;
         }
+        public int getFirerate(){return fireRate;}
+        public double getDamage(){return damage;}
+        public double getRange(){return range;}
+        public double getUpgradePrice(){return upgradePrice;}
+        public ItemStack getItemStack() {return itemStack;}
     }
 }

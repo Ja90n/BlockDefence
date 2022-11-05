@@ -1,26 +1,19 @@
 package com.ja90n.blockdefence.towers;
 
-import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.enemies.Enemy;
 import com.ja90n.blockdefence.instances.Game;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import com.ja90n.blockdefence.util.TowerMenuGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArcherTower implements Tower {
 
-    private Location location;
     private ArmorStand armorStand;
     // Cooldown in ticks
     private int fireRate;
@@ -28,34 +21,37 @@ public class ArcherTower implements Tower {
     private double range;
     private Game game;
     private int shootCooldown = 0;
-
-    private int upgradeState;
     private double totalValue;
     private double totalDamage;
+
+    private ArcherUpgradeStates archerUpgradeStates;
 
     private Inventory towerMenu;
 
     public ArcherTower(Location location, Game game){
-
         this.game = game;
 
-        fireRate = 10;
-        damage = 5;
-        range = 2;
+        archerUpgradeStates = ArcherUpgradeStates.STANDARDARCHER;
+
+        fireRate = archerUpgradeStates.getFirerate();
+        damage = archerUpgradeStates.getDamage();
+        range = archerUpgradeStates.getRange();
 
         totalDamage = 0;
-        upgradeState = 0;
+        totalValue = 100;
 
-        armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
-        armorStand.setBasePlate(false);
-        armorStand.setInvisible(true);
-        armorStand.setGravity(false);
-        armorStand.setInvulnerable(true);
-        armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.WOODEN_HOE,1));
+        armorStand = game.getTowerManager().getArmorStand(archerUpgradeStates.getItemStack(), location);
 
         towerMenu = new TowerMenuGenerator().generateTowerMenu
                 (Material.RED_STAINED_GLASS_PANE, ChatColor.WHITE + "Archer tower",game);
 
+        new TowerMenuGenerator().updateTowerMenu(this);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.BLUE + "Fire rate: " + ChatColor.WHITE + fireRate);
+        lore.add(ChatColor.RED + "Damage: " + ChatColor.WHITE + damage);
+        lore.add(ChatColor.GREEN + "Range: " + ChatColor.WHITE + range);
+        towerMenu.setItem(10,game.createItem(Material.PAPER,"Statistics",lore));
     }
 
     @Override
@@ -63,13 +59,11 @@ public class ArcherTower implements Tower {
         shootCooldown++;
         if (shootCooldown == fireRate){
             if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
-                Enemy target = game.getEnemyManager().getFirstEnemy(Arrays.asList(getNearbyEntities(armorStand.getLocation(), (int) range)));
+                Enemy target = game.getEnemyManager().getFirstEnemy(armorStand.getLocation(),range);
                 if (target != null){
                     target.damage(damage);
                     addTotalDamage(damage);
-                    for (UUID uuid : game.getCoins().keySet()){
-                        game.getCoins().put(uuid,game.getCoins().get(uuid) + damage);
-                    }
+                    game.addCoins(damage);
                     armorStand.teleport(armorStand.getLocation().setDirection(target.getArmorStand().getLocation().toVector()
                             .subtract(armorStand.getLocation().toVector())));
                 }
@@ -78,35 +72,43 @@ public class ArcherTower implements Tower {
         }
     }
 
-    public void addTotalDamage(double damage){
-        totalDamage = totalDamage + damage;
-        towerMenu.setItem(19,game.createItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED +
-                "Damage: " + ChatColor.WHITE + totalDamage));
-    }
-
-    public static Entity[] getNearbyEntities(Location l, int radius){
-        int chunkRadius = radius < 16 ? 1 : (radius - (radius % 16))/16;
-        HashSet<Entity> radiusEntities = new HashSet<Entity>();
-        for (int chX = 0 -chunkRadius; chX <= chunkRadius; chX ++){
-            for (int chZ = 0 -chunkRadius; chZ <= chunkRadius; chZ++){
-                int x=(int) l.getX(),y=(int) l.getY(),z=(int) l.getZ();
-                for (Entity e : new Location(l.getWorld(),x+(chX*16),y,z+(chZ*16)).getChunk().getEntities()){
-                    if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock()) radiusEntities.add(e);
-                }
-            }
-        }
-        return radiusEntities.toArray(new Entity[radiusEntities.size()]);
-    }
 
     @Override
     public void upgrade() {
-        upgradeState++;
-        switch (upgradeState){
-            case 1:
-                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.STONE_HOE,1));
-                damage = damage * 2;
+
+        totalValue = totalValue + archerUpgradeStates.getUpgradePrice();
+
+        switch (archerUpgradeStates){
+            case STANDARDARCHER:
+                archerUpgradeStates = ArcherUpgradeStates.NOVICEARCHER;
+                break;
+            case NOVICEARCHER:
+                archerUpgradeStates = ArcherUpgradeStates.ADVANCEDARCHER;
+                break;
+            case ADVANCEDARCHER:
+                archerUpgradeStates = ArcherUpgradeStates.ROBINHOOD;
                 break;
         }
+        damage = archerUpgradeStates.getDamage();
+        fireRate = archerUpgradeStates.getFirerate();
+        range = archerUpgradeStates.getRange();
+
+        shootCooldown = 0;
+
+        new TowerMenuGenerator().updateTowerMenu(this);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.BLUE + "Fire rate: " + ChatColor.WHITE + fireRate);
+        lore.add(ChatColor.RED + "Damage: " + ChatColor.WHITE + damage);
+        lore.add(ChatColor.GREEN + "Range: " + ChatColor.WHITE + range);
+        towerMenu.setItem(10,game.createItem(Material.PAPER,"Statistics",lore));
+
+        armorStand.getEquipment().setHelmet(archerUpgradeStates.getItemStack());
+    }
+
+    @Override
+    public double getStarterPrice() {
+        return 100;
     }
 
     @Override
@@ -130,19 +132,43 @@ public class ArcherTower implements Tower {
     }
 
     @Override
-    public double getStarterPrice() {
-        return 0;
+    public double getUpgradePrice() {
+        return archerUpgradeStates.getUpgradePrice();
     }
 
     @Override
-    public double getUpgradePrice() {
-        switch (upgradeState){
-            case 0:
-                return 400;
-            case 1:
-                return 800;
-            default:
-                return 999999999;
-        }
+    public double getTotalDamage() {
+        return totalDamage;
     }
+
+    // Setters
+
+    @Override
+    public void setTotalDamage(double damage) {
+        totalDamage = damage;
+    }
+}
+
+enum ArcherUpgradeStates {
+    STANDARDARCHER(10, 5, 4, 100,new ItemStackGenerator().getItemStack(Material.WOODEN_HOE,1)),
+    NOVICEARCHER(5, 5, 4,200,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
+    ADVANCEDARCHER(5, 5, 8,400,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
+    ROBINHOOD(5, 10, 10,999999999,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1));
+
+    private int fireRate;
+    private double damage,range,upgradePrice;
+    private ItemStack itemStack;
+
+    ArcherUpgradeStates(int fireRate, double damage, double range, double upgradePrice, ItemStack itemStack) {
+        this.fireRate = fireRate;
+        this.damage = damage;
+        this.range = range;
+        this.upgradePrice = upgradePrice;
+        this.itemStack = itemStack;
+    }
+    public int getFirerate(){return fireRate;}
+    public double getDamage(){return damage;}
+    public double getRange(){return range;}
+    public double getUpgradePrice(){return upgradePrice;}
+    public ItemStack getItemStack() {return itemStack;}
 }
