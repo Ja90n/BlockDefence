@@ -172,28 +172,28 @@ public class CannonTower implements Tower {
     public void setTotalDamage(double damage) {
         totalDamage = damage;
     }
+}
 
-    enum CanonUpgradeStates {
-        STANDARDCANNON(40, 10, 3, 600,new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,1)),
-        NOVICECANNON(30, 15, 3,1800,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
-        ADVANCEDCANNON(30, 20, 4,3200,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
-        WOWCANNON(20, 40, 5,999999999,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1));
+enum CanonUpgradeStates {
+    STANDARDCANNON(40, 10, 3, 600,new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,1)),
+    NOVICECANNON(30, 15, 3,1800,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
+    ADVANCEDCANNON(30, 20, 4,3200,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1)),
+    WOWCANNON(20, 40, 5,999999999,new ItemStackGenerator().getItemStack(Material.STONE_AXE,1));
 
-        private int fireRate;
-        private double damage,range,upgradePrice;
-        private ItemStack itemStack;
+    private int fireRate;
+    private double damage,range,upgradePrice;
+    private ItemStack itemStack;
 
-        CanonUpgradeStates(int fireRate, double damage, double range, double upgradePrice, ItemStack itemStack) {
-            this.fireRate = fireRate;
-            this.damage = damage;
-            this.range = range;
-            this.upgradePrice = upgradePrice;
-            this.itemStack = itemStack;
-        }
-        public int getFirerate(){return fireRate;}
-        public double getDamage(){return damage;}
-        public double getRange(){return range;}
-        public double getUpgradePrice(){return upgradePrice;}
-        public ItemStack getItemStack() {return itemStack;}
+    CanonUpgradeStates(int fireRate, double damage, double range, double upgradePrice, ItemStack itemStack) {
+        this.fireRate = fireRate;
+        this.damage = damage;
+        this.range = range;
+        this.upgradePrice = upgradePrice;
+        this.itemStack = itemStack;
     }
+    public int getFirerate(){return fireRate;}
+    public double getDamage(){return damage;}
+    public double getRange(){return range;}
+    public double getUpgradePrice(){return upgradePrice;}
+    public ItemStack getItemStack() {return itemStack;}
 }

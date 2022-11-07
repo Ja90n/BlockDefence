@@ -8,6 +8,8 @@ import com.ja90n.blockdefence.towers.PatrolTower;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -26,30 +28,34 @@ public class PatrolCar implements TowerMoveable {
     private ArmorStand armorStand;
     // Cooldown in ticks
     private int fireRate;
-    private int upgradeState;
     private double damage;
     private double range;
     private double health;
     private int shootCooldown = 0;
 
-    public PatrolCar(PatrolTower patrolTower, int upgradeState){
+    public PatrolCar(PatrolTower patrolTower){
         this.patrolTower = patrolTower;
-        this.upgradeState = upgradeState;
 
         path = reverseArrayList(BlockDefence.getInstance().getPathGenerator().getPath(1));
         Location location = path.get(0);
 
-        fireRate = 5;
-        damage = 1;
-        range = 2;
-        health = 20.0;
+        fireRate = (int) patrolTower.getCarFireRate();
+        damage = patrolTower.getDamage();
+        range = patrolTower.getRange();
+        health = patrolTower.getHealth();
 
         armorStand = getGame().getTowerManager().getArmorStand
                 (new ItemStackGenerator().getItemStack(Material.WOODEN_AXE,4), location);
 
-        switch (upgradeState){
-            case 1:
+        switch ((int) health){
+            case 60:
                 armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.STONE_AXE,4));
+                break;
+            case 120:
+                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.IRON_AXE,4));
+                break;
+            case 400:
+                armorStand.getEquipment().setHelmet(new ItemStackGenerator().getItemStack(Material.GOLDEN_AXE,4));
                 break;
         }
     }
@@ -76,7 +82,7 @@ public class PatrolCar implements TowerMoveable {
 
         // Collision check with an entity
         if (!armorStand.getNearbyEntities(0.1,0.1,0.1).isEmpty()){
-            ArrayList<Enemy> enemies = getGame().getEnemyManager().getEnemies(armorStand.getNearbyEntities(0.2,0.2,0.2));
+            ArrayList<Enemy> enemies = getGame().getEnemyManager().getEnemies(armorStand.getNearbyEntities(0.1,0.1,0.1));
             // Gets all the enemies in range
             if (!enemies.isEmpty()){
                 // Gets the first enemy
@@ -85,10 +91,20 @@ public class PatrolCar implements TowerMoveable {
                 if (enemy.getHealth() > health){
                     // If so it removes the car
                     patrolTower.addTotalDamage(health);
-                    for (UUID uuid : getGame().getCoins().keySet()){
-                        getGame().getCoins().put(uuid,getGame().getCoins().get(uuid) + health);
-                    }
+                    getGame().addCoins(health);
                     enemy.damage(health);
+
+                    if (damage != 0){
+                        ArrayList<Enemy> bombedTargets = getGame().getEnemyManager().getEnemies(armorStand.getNearbyEntities(1,1,1));
+                        for (Enemy enemy1 : bombedTargets){
+                            enemy1.damage(20);
+                            patrolTower.addTotalDamage(20);
+                            getGame().addCoins(20);
+                        }
+                        armorStand.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, armorStand.getLocation(), 1);
+                        armorStand.getWorld().playSound(armorStand.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
+                    }
+
                     remove();
                 } else {
                     // Otherwise it damages the car and goes on
@@ -105,7 +121,7 @@ public class PatrolCar implements TowerMoveable {
 
     @Override
     public void shoot() {
-        if (upgradeState >= 1){
+        if (range >= 1){
             if (shootCooldown == fireRate){
                 if (!armorStand.getNearbyEntities(range,range,range).isEmpty()){
                     Enemy target = getGame().getEnemyManager().getFirstEnemy(armorStand.getLocation(),range);

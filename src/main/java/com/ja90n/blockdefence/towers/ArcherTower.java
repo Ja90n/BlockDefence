@@ -75,9 +75,7 @@ public class ArcherTower implements Tower {
 
     @Override
     public void upgrade() {
-
         totalValue = totalValue + archerUpgradeStates.getUpgradePrice();
-
         switch (archerUpgradeStates){
             case STANDARDARCHER:
                 archerUpgradeStates = ArcherUpgradeStates.NOVICEARCHER;
@@ -150,10 +148,10 @@ public class ArcherTower implements Tower {
 }
 
 enum ArcherUpgradeStates {
-    STANDARDARCHER(10, 5, 4, 100,new ItemStackGenerator().getItemStack(Material.WOODEN_HOE,1)),
-    NOVICEARCHER(5, 5, 4,200,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
-    ADVANCEDARCHER(5, 5, 8,400,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
-    ROBINHOOD(5, 10, 10,999999999,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1));
+    STANDARDARCHER(20, 1, 3, 100,new ItemStackGenerator().getItemStack(Material.WOODEN_HOE,1)),
+    NOVICEARCHER(15, 2, 4,200,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
+    ADVANCEDARCHER(10, 4, 6,400,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1)),
+    ROBINHOOD(7, 8, 8,999999999,new ItemStackGenerator().getItemStack(Material.STONE_HOE,1));
 
     private int fireRate;
     private double damage,range,upgradePrice;

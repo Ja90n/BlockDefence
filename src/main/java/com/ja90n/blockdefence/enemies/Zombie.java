@@ -32,8 +32,8 @@ public class Zombie implements Enemy{
 
         this.game = game;
 
-        health = 10.0;
-        movementSpeed = 1;
+        health = 5.0;
+        movementSpeed = 1.25;
         path = BlockDefence.getInstance().getPathGenerator().getPath(movementSpeed);
     }
 
