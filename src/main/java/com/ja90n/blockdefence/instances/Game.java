@@ -5,6 +5,7 @@ import com.ja90n.blockdefence.enums.GameState;
 import com.ja90n.blockdefence.managers.EnemyManager;
 import com.ja90n.blockdefence.managers.TowerManager;
 import com.ja90n.blockdefence.runnables.GameRunnable;
+import com.ja90n.blockdefence.managers.WaveManager;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -19,27 +20,25 @@ import java.util.UUID;
 
 public class Game {
 
-    private BlockDefence blockDefence;
-    private Arena arena;
+    private final BlockDefence blockDefence;
+    private final Arena arena;
     private HashMap<UUID, Double> coins;
-    private GameRunnable gameRunnable;
+    private final GameRunnable gameRunnable;
 
-    private TowerManager towerManager;
-    private EnemyManager enemyManager;
-
+    private final TowerManager towerManager;
+    private final EnemyManager enemyManager;
+    private WaveManager waveManager;
     private double castleHealth;
     private ArmorStand armorStand;
 
-    private int wave;
-
     public Game(BlockDefence blockDefence, Arena arena){
 
+        waveManager = new WaveManager(this);
         towerManager = new TowerManager(this);
         enemyManager = new EnemyManager(this);
 
         this.blockDefence = blockDefence;
         this.arena = arena;
-        wave = 0;
         gameRunnable = new GameRunnable(blockDefence,this);
         coins = new HashMap<>();
         castleHealth = 250;
@@ -99,9 +98,6 @@ public class Game {
     public GameRunnable getGameRunnable() {
         return gameRunnable;
     }
-    public int getWave() {
-        return wave;
-    }
     public TowerManager getTowerManager() {
         return towerManager;
     }
@@ -111,6 +107,11 @@ public class Game {
     public ArmorStand getArmorStand() {
         return armorStand;
     }
+
+    public WaveManager getWaveManager() {
+        return waveManager;
+    }
+
     public ItemStack createItem(Material material, String name){
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
@@ -135,5 +136,9 @@ public class Game {
         itemMeta.setLore(lore);
         itemStack.setItemMeta(itemMeta);
         return itemStack;
+    }
+
+    public BlockDefence getBlockDefence() {
+        return blockDefence;
     }
 }

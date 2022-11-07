@@ -21,8 +21,8 @@ public class Smiler implements Enemy{
     private double movementSpeed;
     private ArmorStand armorStand;
 
-    public Smiler(Game game,Location location){
-
+    @Override
+    public void initialize(Game game, Location location) {
         armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         armorStand.setInvulnerable(true);
         armorStand.setGravity(false);

@@ -1,18 +1,14 @@
 package com.ja90n.blockdefence.enemies;
 
-import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.instances.Game;
-import com.ja90n.blockdefence.managers.EnemyManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 
 public interface Enemy {
+
+    void initialize(Game game, Location location);
 
     default void move(){
         ArrayList <Location> path = getPath();

@@ -135,7 +135,9 @@ public class InteractEvent implements Listener {
                         game.getEnemyManager().addEnemy(new Zombie(game,new PathGenerator(blockDefence).getPathLocation("0")));
                         break;
                     case 1:
-                        game.getEnemyManager().addEnemy(new Smiler(game,new PathGenerator(blockDefence).getPathLocation("0")));
+                        Smiler smiler = new Smiler();
+                        game.getEnemyManager().addEnemy(smiler);
+                        smiler.initialize(game,new PathGenerator(blockDefence).getPathLocation("0"));
                         break;
                 }
             } else if (clickedTower.containsKey(player.getUniqueId())){

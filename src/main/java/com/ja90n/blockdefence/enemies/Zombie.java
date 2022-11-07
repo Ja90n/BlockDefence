@@ -2,7 +2,6 @@ package com.ja90n.blockdefence.enemies;
 
 import com.ja90n.blockdefence.BlockDefence;
 import com.ja90n.blockdefence.instances.Game;
-import com.ja90n.blockdefence.util.PathGenerator;
 import com.ja90n.blockdefence.util.ItemStackGenerator;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -21,8 +20,8 @@ public class Zombie implements Enemy{
     private double movementSpeed;
     private ArmorStand armorStand;
 
-    public Zombie(Game game, Location location){
-
+    @Override
+    public void initialize(Game game, Location location) {
         armorStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         armorStand.setInvulnerable(true);
         armorStand.setGravity(false);
